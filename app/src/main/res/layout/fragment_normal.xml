@@ -5,8 +5,11 @@
     android:layout_height="match_parent"
     tools:context=".view.fragment.NormalFragment">
 
-    <ListView
-        android:id="@+id/lvTask"
+    <ExpandableListView
+        android:id="@+id/lvNormal"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:divider="@color/black"
+        android:dividerHeight="1dp"
+        android:scrollbars="none"/>
 </RelativeLayout>
