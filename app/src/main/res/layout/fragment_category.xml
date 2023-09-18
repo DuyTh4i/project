@@ -29,9 +29,9 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvPersonal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:paddingStart="15dp"
-                android:paddingEnd="15dp"/>
+                android:paddingEnd="15dp" />
 
             <TextView
                 android:id="@+id/tvWork"
@@ -47,9 +47,9 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvWork"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:paddingStart="15dp"
-                android:paddingEnd="15dp"/>
+                android:paddingEnd="15dp" />
 
             <TextView
                 android:id="@+id/tvHealth"
@@ -65,9 +65,9 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvHealth"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:paddingStart="15dp"
-                android:paddingEnd="15dp"/>
+                android:paddingEnd="15dp" />
 
             <TextView
                 android:id="@+id/tvFinance"
@@ -83,9 +83,9 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvFinance"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:paddingStart="15dp"
-                android:paddingEnd="15dp"/>
+                android:paddingEnd="15dp" />
             <TextView
                 android:id="@+id/tvFamily"
                 android:layout_width="match_parent"
@@ -100,7 +100,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvFamily"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:paddingStart="15dp"
                 android:paddingEnd="15dp" />
 

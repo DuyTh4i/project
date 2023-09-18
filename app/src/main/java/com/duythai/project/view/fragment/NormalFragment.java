@@ -4,53 +4,31 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.room.Room;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.*;
 
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.TextView;
 
-import com.duythai.project.DAO.AppDatabase;
-import com.duythai.project.DAO.ITaskDAO;
 import com.duythai.project.R;
 import com.duythai.project.apdapter.TaskAdapter;
-import com.duythai.project.model.Task;
+import com.duythai.project.utils.DateConverter;
+import com.duythai.project.viewmodel.TaskViewModel;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Locale;
 
 public class NormalFragment extends Fragment {
 
     RecyclerView rvToday, rvTomorrow, rvUpcoming, rvLate;
     TextView tvToday, tvTomorrow, tvUpcoming, tvLate;
-    public static ArrayList<Task> tasks;
-    ArrayList<Task> today, tomorrow, late, upcoming;
-    public static TaskAdapter todayAdapter, tomorrowAdapter, lateAdapter, upcomingAdapter;
-    AppDatabase db;
-    ITaskDAO taskDAO;
+    TaskViewModel viewModel;
 
-    public interface OnTaskAddedListener{
-        void onTaskAddedNormal(Task task);
-        boolean onNavigationItemSelectedNormal(@NonNull MenuItem item);
-    }
-
-    public void addTaskToList(Task task){
-        tasks.add(task);
-        todayAdapter.notifyItemInserted(tasks.size() - 1);
-    }
+    public NormalFragment(){}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_normal, container, false);
-        View cardLayout = inflater.inflate(R.layout.layout_item, container, false);
+        viewModel = new ViewModelProvider(this).get(TaskViewModel.class);
 
         tvToday = root.findViewById(R.id.tvToday);
         tvTomorrow = root.findViewById(R.id.tvTomorrow);
@@ -62,48 +40,37 @@ public class NormalFragment extends Fragment {
         rvUpcoming = root.findViewById(R.id.rvUpcoming);
         rvLate = root.findViewById(R.id.rvLate);
 
-        db = Room.databaseBuilder(requireContext(), AppDatabase.class, "prjdb").allowMainThreadQueries().build();
-        taskDAO = db.taskDAO();
+        TaskAdapter todayAdapter = new TaskAdapter(new TaskAdapter.TaskDiff());
+        TaskAdapter tomorrowAdapter = new TaskAdapter(new TaskAdapter.TaskDiff());
+        TaskAdapter upcomingAdapter = new TaskAdapter(new TaskAdapter.TaskDiff());
+        TaskAdapter lateAdapter = new TaskAdapter(new TaskAdapter.TaskDiff());
 
-        today = new ArrayList<>();
-        tomorrow = new ArrayList<>();
-        upcoming = new ArrayList<>();
-        late = new ArrayList<>();
-
-        todayAdapter = new TaskAdapter(requireContext());
-        tomorrowAdapter = new TaskAdapter(requireContext());
-        upcomingAdapter = new TaskAdapter(requireContext());
-        lateAdapter = new TaskAdapter(requireContext());
-
-        ArrayList<Task> list = new ArrayList<>(db.taskDAO().getAll());
-        for(Task task : list){
-            loadTask(task.getContent(), task.getCategory(), task.getDate(), task.getNote());
-        }
-
-        todayAdapter.getAll(today);
-        tomorrowAdapter.getAll(tomorrow);
-        upcomingAdapter.getAll(upcoming);
-        lateAdapter.getAll(late);
-
-        LinearLayoutManager man1 = new LinearLayoutManager(requireContext());
-        LinearLayoutManager man2 = new LinearLayoutManager(requireContext());
-        LinearLayoutManager man3 = new LinearLayoutManager(requireContext());
-        LinearLayoutManager man4 = new LinearLayoutManager(requireContext());
-
-        rvToday.setLayoutManager(man1);
-        rvTomorrow.setLayoutManager(man2);
-        rvUpcoming.setLayoutManager(man3);
-        rvLate.setLayoutManager(man4);
+        rvToday.setLayoutManager(new LinearLayoutManager(requireContext()));
+        rvTomorrow.setLayoutManager(new LinearLayoutManager(requireContext()));
+        rvUpcoming.setLayoutManager(new LinearLayoutManager(requireContext()));
+        rvLate.setLayoutManager(new LinearLayoutManager(requireContext()));
 
         rvToday.setAdapter(todayAdapter);
         rvTomorrow.setAdapter(tomorrowAdapter);
         rvUpcoming.setAdapter(upcomingAdapter);
         rvLate.setAdapter(lateAdapter);
 
-        tvToday.setText("Today(" + today.size() + ")");
-        tvTomorrow.setText("Tomorrow(" + tomorrow.size() + ")");
-        tvUpcoming.setText("Upcoming(" + upcoming.size() + ")");
-        tvLate.setText("Late(" + late.size() + ")");
+        viewModel.getTodayTasks(DateConverter.getCurrentDate()).observe(getViewLifecycleOwner(), tasks ->{
+            todayAdapter.submitList(tasks);
+            tvToday.setText("Today(" + todayAdapter.getItemCount() + ")");
+        });
+        viewModel.getTomorrowTasks(DateConverter.getTomorrow()).observe(getViewLifecycleOwner(), tasks ->{
+            tomorrowAdapter.submitList(tasks);
+            tvTomorrow.setText("Tomorrow(" + tomorrowAdapter.getItemCount() + ")");
+        });
+        viewModel.getUpcomingTasks(DateConverter.getTomorrow()).observe(getViewLifecycleOwner(), tasks ->{
+            upcomingAdapter.submitList(tasks);
+            tvUpcoming.setText("Upcoming(" + upcomingAdapter.getItemCount() + ")");
+        });
+        viewModel.getLateTasks(DateConverter.getCurrentDate()).observe(getViewLifecycleOwner(), tasks ->{
+            lateAdapter.submitList(tasks);
+            tvLate.setText("Late(" + lateAdapter.getItemCount() + ")");
+        });
 
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT) {
             @Override
@@ -112,7 +79,8 @@ public class NormalFragment extends Fragment {
             }
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                todayAdapter.remove(viewHolder.getAdapterPosition());
+                viewModel.delete(todayAdapter.getItem(viewHolder.getAdapterPosition()).getId());
+                tvToday.setText("Today(" + todayAdapter.getItemCount() + ")");
             }
         }).attachToRecyclerView(rvToday);
 
@@ -123,7 +91,8 @@ public class NormalFragment extends Fragment {
             }
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                tomorrowAdapter.remove(viewHolder.getAdapterPosition());
+                viewModel.delete(tomorrowAdapter.getItem(viewHolder.getAdapterPosition()).getId());
+                tvTomorrow.setText("Tomorrow(" + tomorrowAdapter.getItemCount() + ")");
             }
         }).attachToRecyclerView(rvTomorrow);
 
@@ -134,7 +103,8 @@ public class NormalFragment extends Fragment {
             }
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                upcomingAdapter.remove(viewHolder.getAdapterPosition());
+                viewModel.delete(upcomingAdapter.getItem(viewHolder.getAdapterPosition()).getId());
+                tvUpcoming.setText("Upcoming(" + upcomingAdapter.getItemCount() + ")");
             }
         }).attachToRecyclerView(rvUpcoming);
 
@@ -145,7 +115,8 @@ public class NormalFragment extends Fragment {
             }
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                lateAdapter.remove(viewHolder.getAdapterPosition());
+                viewModel.delete(lateAdapter.getItem(viewHolder.getAdapterPosition()).getId());
+                tvLate.setText("Late(" + lateAdapter.getItemCount() + ")");
             }
         }).attachToRecyclerView(rvLate);
 
@@ -165,7 +136,7 @@ public class NormalFragment extends Fragment {
             }
         });
 
-        tvToday.setOnClickListener(new View.OnClickListener() {
+        tvTomorrow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(params2.height!=0)
@@ -176,7 +147,7 @@ public class NormalFragment extends Fragment {
             }
         });
 
-        tvToday.setOnClickListener(new View.OnClickListener() {
+        rvUpcoming.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(params3.height!=0)
@@ -187,7 +158,7 @@ public class NormalFragment extends Fragment {
             }
         });
 
-        tvToday.setOnClickListener(new View.OnClickListener() {
+        rvLate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(params4.height!=0)
@@ -199,26 +170,5 @@ public class NormalFragment extends Fragment {
         });
 
         return root;
-    }
-
-    void loadTask(String content, String category, String due, String note){
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-        Calendar calendar = Calendar.getInstance();
-        try {
-            calendar.setTime(sdf.parse(due));
-        } catch (Exception e){
-            e.printStackTrace();
-            return;
-        }
-        Calendar currentDate = Calendar.getInstance();
-        Task addedTask = new Task(content, category, note, due, false);
-        if (calendar.get(Calendar.DAY_OF_YEAR) < currentDate.get(Calendar.DAY_OF_YEAR))
-            late.add(addedTask);
-        else if (calendar.get(Calendar.DAY_OF_YEAR) == currentDate.get(Calendar.DAY_OF_YEAR))
-            today.add(addedTask);
-        else if (calendar.get(Calendar.DAY_OF_YEAR) == currentDate.get(Calendar.DAY_OF_YEAR) + 1)
-            tomorrow.add(addedTask);
-        else
-            upcoming.add(addedTask);
     }
 }

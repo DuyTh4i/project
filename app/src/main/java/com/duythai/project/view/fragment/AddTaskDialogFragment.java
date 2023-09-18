@@ -8,6 +8,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.view.*;
 import android.widget.*;
@@ -15,6 +16,8 @@ import android.widget.*;
 import com.duythai.project.R;
 import com.duythai.project.model.Category;
 import com.duythai.project.model.Task;
+import com.duythai.project.utils.DateConverter;
+import com.duythai.project.viewmodel.TaskViewModel;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,9 +30,9 @@ public class AddTaskDialogFragment extends DialogFragment implements View.OnClic
     Spinner sCategory;
     ImageView ivCalendar;
     TextView tvDate;
-    Category categories;
-    NormalFragment normalFragment = new NormalFragment();
-    CategoryFragment categoryFragment = new CategoryFragment();
+    Category categories = new Category();
+
+    TaskViewModel viewModel;
 
     public AddTaskDialogFragment(){}
 
@@ -39,6 +42,8 @@ public class AddTaskDialogFragment extends DialogFragment implements View.OnClic
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         View view = LayoutInflater.from(requireContext()).inflate(R.layout.fragment_add_task, null);
         builder.setView(view);
+
+        viewModel = new ViewModelProvider(this).get(TaskViewModel.class);
 
         EditText etContent = view.findViewById(R.id.etContent);
         Spinner sCategory = view.findViewById(R.id.sCategory);
@@ -73,46 +78,13 @@ public class AddTaskDialogFragment extends DialogFragment implements View.OnClic
         });
 
         builder.setPositiveButton("Save", (dialog, which) -> {
-            String title = etContent.getText().toString();
-            String dueDate = tvDate.getText().toString();
-            String label = sCategory.getSelectedItem().toString();
-            String note = etNote.getText().toString();
-            addTaskToList(title,label,dueDate, note);
+            viewModel.insert(new Task(etContent.getText().toString(), sCategory.getSelectedItem().toString(), etNote.getText().toString(), DateConverter.getCurrentDate(), false));
         });
 
         builder.setNegativeButton("Cancel", null);
         return builder.create();
     }
 
-    private void addTaskToList(String content, String category, String date, String note) {
-        // Convert the due date string to a Calendar object
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
-        Calendar dueDateCalendar = Calendar.getInstance();
-        try {
-            dueDateCalendar.setTime(dateFormat.parse(date));
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return;
-        }
-
-        Calendar currentDate = Calendar.getInstance();
-        Task addedTask = new Task(content, category, note, date, false);
-        if (dueDateCalendar.get(Calendar.DAY_OF_YEAR) < currentDate.get(Calendar.DAY_OF_YEAR)) {
-            NormalFragment.lateAdapter.addTask(addedTask);
-            NormalFragment.lateAdapter.notifyDataSetChanged();
-        } else if (dueDateCalendar.get(Calendar.DAY_OF_YEAR) == currentDate.get(Calendar.DAY_OF_YEAR)) {
-            NormalFragment.todayAdapter.addTask(addedTask);
-            NormalFragment.todayAdapter.notifyDataSetChanged();
-        } else if (dueDateCalendar.get(Calendar.DAY_OF_YEAR) == currentDate.get(Calendar.DAY_OF_YEAR) + 1) {
-            normalFragment.tomorrowAdapter.addTask(addedTask);
-            normalFragment.tomorrowAdapter.notifyDataSetChanged();
-        } else {
-            normalFragment.upcomingAdapter.addTask(addedTask);
-            normalFragment.upcomingAdapter.notifyDataSetChanged();
-        }
-
-    }
 
     @Override
     public void onClick(View view) {}

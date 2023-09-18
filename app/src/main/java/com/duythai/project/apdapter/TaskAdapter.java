@@ -1,80 +1,43 @@
 package com.duythai.project.apdapter;
 
-import android.app.AlertDialog;
-import android.app.DatePickerDialog;
-import android.content.Context;
-import android.graphics.Color;
+import android.annotation.SuppressLint;
 import android.view.*;
-import android.widget.*;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.room.Room;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 
-import com.duythai.project.DAO.AppDatabase;
-import com.duythai.project.DAO.ITaskDAO;
-import com.duythai.project.R;
-import com.duythai.project.model.Category;
 import com.duythai.project.model.Task;
 
-import java.util.*;
-
 @SuppressWarnings("unchecked")
-public class TaskAdapter extends RecyclerView.Adapter<RecyclerViewHolder> {
+public class TaskAdapter extends ListAdapter<Task, TaskViewHolder> {
 
-    private ArrayList<Task> list;
-    private Context mcontext;
-    private AppDatabase db;
-    private ITaskDAO taskDao;
-
-    public TaskAdapter(Context mcontext) {
-        this.list = new ArrayList<>();
-        this.mcontext = mcontext;
-        db = Room.databaseBuilder(mcontext, AppDatabase.class, "lap.db").allowMainThreadQueries().build();
-        taskDao = db.taskDAO();
+    public TaskAdapter(@NonNull DiffUtil.ItemCallback<Task> diffCallback) {
+        super(diffCallback);
     }
 
     @NonNull
     @Override
-    public RecyclerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_normal, parent, false);
-        return new RecyclerViewHolder(view);
+    public TaskViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return TaskViewHolder.create(parent);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerViewHolder holder, int position) {
-        Task task = list.get(position);
-        holder.tvContent.setText(task.getContent());
-        holder.tvCategory.setText(task.getCategory());
-        holder.tvDate.setText(task.getDate());
-
-        holder.cbDone.setChecked(task.isDone());
-        holder.cvItem.setCardBackgroundColor(Color.WHITE);
-        if(task.isDone())
-            holder.cvItem.setCardBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.gray));
-
-        holder.cbDone.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean flag) {
-                task.setDone(flag);
-                if(flag)
-                    holder.cvItem.setCardBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.gray));
-                else
-                    holder.cvItem.setCardBackgroundColor(Color.WHITE);
-            }
-        });
-
-        boolean isLate = isTaskLate(task);
-        holder.tvContent.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.black));
-        if(isLate)
-            holder.tvContent.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.red));
-
-        holder.cvItem.setOnClickListener(view -> {
-            showEditDialog(task, position);
-        });
+    public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
+        holder.bind(getItem(position), position);
     }
 
+    @Override
+    public int getItemCount() {
+        return super.getItemCount();
+    }
+
+    @Override
+    public Task getItem(int position) {
+        return super.getItem(position);
+    }
+
+    /*
     @Override
     public int getItemCount() {
         return 0;
@@ -87,8 +50,8 @@ public class TaskAdapter extends RecyclerView.Adapter<RecyclerViewHolder> {
     }
 
     public void getAll(ArrayList<Task> list) {
-        list.clear();
-        list.addAll(list);
+        this.list.clear();
+        this.list.addAll(list);
         notifyDataSetChanged();
     }
 
@@ -99,19 +62,6 @@ public class TaskAdapter extends RecyclerView.Adapter<RecyclerViewHolder> {
         notifyItemRemoved(position);
     }
 
-    private boolean isTaskLate(Task task) {
-
-        Calendar currentDate = Calendar.getInstance();
-        currentDate.set(Calendar.HOUR_OF_DAY, 0);
-        currentDate.set(Calendar.MINUTE, 0);
-        currentDate.set(Calendar.SECOND, 0);
-        currentDate.set(Calendar.MILLISECOND, 0);
-
-        long currentTimeMillis = currentDate.getTimeInMillis();
-        Date dueDate = task.stringToDate(task.getDate());
-
-        return dueDate != null && dueDate.getTime() < currentTimeMillis;
-    }
 
     private void showEditDialog(Task task, int position) {
         Category categories = new Category();
@@ -169,5 +119,20 @@ public class TaskAdapter extends RecyclerView.Adapter<RecyclerViewHolder> {
 
         builder.setNegativeButton("Cancel", null);
         builder.create().show();
+    }
+*/
+
+    public static class TaskDiff extends DiffUtil.ItemCallback<Task> {
+
+        @Override
+        public boolean areItemsTheSame(@NonNull Task oldItem, @NonNull Task newItem) {
+            return oldItem == newItem;
+        }
+
+        @SuppressLint("DiffUtilEquals")
+        @Override
+        public boolean areContentsTheSame(@NonNull Task oldItem, @NonNull Task newItem) {
+            return oldItem.equals(newItem);
+        }
     }
 }

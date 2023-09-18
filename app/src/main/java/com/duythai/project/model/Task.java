@@ -9,7 +9,6 @@ import java.util.*;
 @Entity(tableName = "task_table")
 public class Task {
     @PrimaryKey(autoGenerate = true)
-    @NonNull
     @ColumnInfo(name = "id")
     private long id;
     @NonNull
@@ -23,12 +22,12 @@ public class Task {
     private String note;
     @NonNull
     @ColumnInfo(name = "date")
-    private String date;
+    private Date date;
     @NonNull
-    @ColumnInfo(name = "isChecked")
+    @ColumnInfo(name = "isDone")
     private boolean isDone;
 
-    public Task(@NonNull String content, @NonNull String category, @NonNull String note, @NonNull String date, boolean isDone) {
+    public Task(@NonNull String content, @NonNull String category, @NonNull String note, @NonNull Date date, boolean isDone) {
         this.content = content;
         this.category = category;
         this.note = note;
@@ -46,6 +45,7 @@ public class Task {
         return null;
     }
 
+    public void setId(long id){this.id = id;}
     public long getId() {
         return id;
     }
@@ -62,16 +62,12 @@ public class Task {
         return note;
     }
 
-    public String getDate() {
+    public Date getDate() {
         return date;
     }
 
     public boolean isDone() {
         return isDone;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public void setContent(@NonNull String content) {
@@ -86,7 +82,7 @@ public class Task {
         this.note = note;
     }
 
-    public void setDate(@NonNull String date) {
+    public void setDate(@NonNull Date date) {
         this.date = date;
     }
 

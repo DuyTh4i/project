@@ -11,12 +11,13 @@ import android.view.*;
 import android.widget.TextView;
 
 import com.duythai.project.DAO.AppDatabase;
-import com.duythai.project.DAO.ITaskDAO;
+import com.duythai.project.DAO.TaskDAO;
 import com.duythai.project.R;
 import com.duythai.project.apdapter.TaskAdapter;
 import com.duythai.project.model.Task;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class CategoryFragment extends Fragment {
 
@@ -26,7 +27,7 @@ public class CategoryFragment extends Fragment {
     ArrayList<Task> personal, work, finance, family, health;
     public static TaskAdapter personalAdapter, workAdapter, financeAdapter, familyAdapter, healthAdapter;
     AppDatabase db;
-    ITaskDAO taskDAO;
+    TaskDAO taskDAO;
 
     public CategoryFragment(){}
 
@@ -66,34 +67,23 @@ public class CategoryFragment extends Fragment {
         family = new ArrayList<>();
         health = new ArrayList<>();
 
-        personalAdapter = new TaskAdapter(requireContext());
-        workAdapter = new TaskAdapter(requireContext());
-        financeAdapter = new TaskAdapter(requireContext());
-        familyAdapter = new TaskAdapter(requireContext());
-        healthAdapter = new TaskAdapter(requireContext());
+        personalAdapter = new TaskAdapter(new TaskAdapter.TaskDiff());
+        workAdapter = new TaskAdapter(new TaskAdapter.TaskDiff());
+        financeAdapter = new TaskAdapter(new TaskAdapter.TaskDiff());
+        familyAdapter = new TaskAdapter(new TaskAdapter.TaskDiff());
+        healthAdapter = new TaskAdapter(new TaskAdapter.TaskDiff());
 
-        ArrayList<Task> list = new ArrayList<>(db.taskDAO().getAll());
+        /*ArrayList<Task> list = new ArrayList<>(db.taskDAO().getAll());
         for(Task task : list){
             loadTask(task.getContent(), task.getCategory(), task.getDate(), task.getNote());
-        }
+        }*/
 
-        personalAdapter.getAll(personal);
-        workAdapter.getAll(work);
-        financeAdapter.getAll(finance);
-        familyAdapter.getAll(family);
-        healthAdapter.getAll(health);
 
-        LinearLayoutManager man1 = new LinearLayoutManager(requireContext());
-        LinearLayoutManager man2 = new LinearLayoutManager(requireContext());
-        LinearLayoutManager man3 = new LinearLayoutManager(requireContext());
-        LinearLayoutManager man4 = new LinearLayoutManager(requireContext());
-        LinearLayoutManager man5 = new LinearLayoutManager(requireContext());
-
-        rvPersonal.setLayoutManager(man1);
-        rvWork.setLayoutManager(man2);
-        rvFamily.setLayoutManager(man3);
-        rvFinance.setLayoutManager(man4);
-        rvHealth.setLayoutManager(man5);
+        rvPersonal.setLayoutManager(new LinearLayoutManager(requireContext()));
+        rvWork.setLayoutManager(new LinearLayoutManager(requireContext()));
+        rvFamily.setLayoutManager(new LinearLayoutManager(requireContext()));
+        rvFinance.setLayoutManager(new LinearLayoutManager(requireContext()));
+        rvHealth.setLayoutManager(new LinearLayoutManager(requireContext()));
 
         rvPersonal.setAdapter(personalAdapter);
         rvWork.setAdapter(workAdapter);
@@ -136,7 +126,7 @@ public class CategoryFragment extends Fragment {
             }
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                familyAdapter.remove(viewHolder.getAdapterPosition());
+                //familyAdapter.remove(viewHolder.getAdapterPosition());
             }
         }).attachToRecyclerView(rvFamily);
 
@@ -147,7 +137,7 @@ public class CategoryFragment extends Fragment {
             }
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                financeAdapter.remove(viewHolder.getAdapterPosition());
+                //financeAdapter.remove(viewHolder.getAdapterPosition());
             }
         }).attachToRecyclerView(rvFinance);
 
@@ -158,7 +148,7 @@ public class CategoryFragment extends Fragment {
             }
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                healthAdapter.remove(viewHolder.getAdapterPosition());
+                //healthAdapter.remove(viewHolder.getAdapterPosition());
             }
         }).attachToRecyclerView(rvHealth);
 
@@ -225,7 +215,7 @@ public class CategoryFragment extends Fragment {
         return root;
     }
 
-    public void loadTask(String content, String category, String note, String date) {
+    public void loadTask(String content, String category, String note, Date date) {
         Task task = new Task(content, category, note, date,false);
         switch (category) {
             case "Personal":
