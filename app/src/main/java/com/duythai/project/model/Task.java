@@ -28,8 +28,6 @@ public class Task {
     @ColumnInfo(name = "isChecked")
     private boolean isDone;
 
-    public Task(){}
-
     public Task(@NonNull String content, @NonNull String category, @NonNull String note, @NonNull String date, boolean isDone) {
         this.content = content;
         this.category = category;

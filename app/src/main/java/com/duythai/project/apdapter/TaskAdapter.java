@@ -20,11 +20,11 @@ import com.duythai.project.model.Task;
 
 import java.util.*;
 
+@SuppressWarnings("unchecked")
 public class TaskAdapter extends RecyclerView.Adapter<RecyclerViewHolder> {
 
     private ArrayList<Task> list;
     private Context mcontext;
-
     private AppDatabase db;
     private ITaskDAO taskDao;
 
@@ -78,6 +78,12 @@ public class TaskAdapter extends RecyclerView.Adapter<RecyclerViewHolder> {
     @Override
     public int getItemCount() {
         return 0;
+    }
+
+    public void addTask(Task task) {
+        taskDao.insert(task);
+        list.add(task);
+        notifyItemInserted(list.size() - 1);
     }
 
     public void getAll(ArrayList<Task> list) {

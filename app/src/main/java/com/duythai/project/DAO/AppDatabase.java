@@ -10,7 +10,7 @@ import com.duythai.project.model.Task;
 
 import java.util.concurrent.*;
 
-@Database(entities = {Task.class}, version = 1)
+@Database(entities = {Task.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract ITaskDAO taskDAO();
