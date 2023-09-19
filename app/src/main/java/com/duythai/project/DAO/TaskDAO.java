@@ -25,12 +25,10 @@ public interface TaskDAO {
     LiveData<List<Task>> getLateTask(Date date);
     @Query("SELECT * FROM task_table WHERE date > :date")
     LiveData<List<Task>> getUpcomingTask(Date date);
-    @Query("SELECT * FROM task_table WHERE category =:category")
-    List<Task> getAllCategory(String category);
-    @Query("SELECT category FROM task_table")
-    List<String> getCategories();
+    @Query("SELECT * FROM task_table WHERE category = :category")
+    LiveData<List<Task>> getTasksByCategory(String category);
     @Query("DELETE FROM task_table WHERE id = :id")
     void delete(long id);
-    @Query("UPDATE task_table SET content = :content, date = :date, category = :category, note= :note WHERE id = :id")
-    void update(String content, Date date, String category, String note, long id);
+    @Update
+    void update(Task task);
 }

@@ -2,7 +2,6 @@ package com.duythai.project.view.fragment;
 
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.*;
@@ -28,7 +27,7 @@ public class NormalFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_normal, container, false);
-        viewModel = new ViewModelProvider(this).get(TaskViewModel.class);
+        viewModel = new ViewModelProvider(NormalFragment.this).get(TaskViewModel.class);
 
         tvToday = root.findViewById(R.id.tvToday);
         tvTomorrow = root.findViewById(R.id.tvTomorrow);
@@ -40,10 +39,10 @@ public class NormalFragment extends Fragment {
         rvUpcoming = root.findViewById(R.id.rvUpcoming);
         rvLate = root.findViewById(R.id.rvLate);
 
-        TaskAdapter todayAdapter = new TaskAdapter(new TaskAdapter.TaskDiff());
-        TaskAdapter tomorrowAdapter = new TaskAdapter(new TaskAdapter.TaskDiff());
-        TaskAdapter upcomingAdapter = new TaskAdapter(new TaskAdapter.TaskDiff());
-        TaskAdapter lateAdapter = new TaskAdapter(new TaskAdapter.TaskDiff());
+        TaskAdapter todayAdapter = new TaskAdapter(new TaskAdapter.TaskDiff(), getParentFragmentManager());
+        TaskAdapter tomorrowAdapter = new TaskAdapter(new TaskAdapter.TaskDiff(), getParentFragmentManager());
+        TaskAdapter upcomingAdapter = new TaskAdapter(new TaskAdapter.TaskDiff(), getParentFragmentManager());
+        TaskAdapter lateAdapter = new TaskAdapter(new TaskAdapter.TaskDiff(), getParentFragmentManager());
 
         rvToday.setLayoutManager(new LinearLayoutManager(requireContext()));
         rvTomorrow.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -57,68 +56,20 @@ public class NormalFragment extends Fragment {
 
         viewModel.getTodayTasks(DateConverter.getCurrentDate()).observe(getViewLifecycleOwner(), tasks ->{
             todayAdapter.submitList(tasks);
-            tvToday.setText("Today(" + todayAdapter.getItemCount() + ")");
+            tvToday.setText("Today(" + tasks.size() + ")");
         });
         viewModel.getTomorrowTasks(DateConverter.getTomorrow()).observe(getViewLifecycleOwner(), tasks ->{
             tomorrowAdapter.submitList(tasks);
-            tvTomorrow.setText("Tomorrow(" + tomorrowAdapter.getItemCount() + ")");
+            tvTomorrow.setText("Tomorrow(" + tasks.size() + ")");
         });
         viewModel.getUpcomingTasks(DateConverter.getTomorrow()).observe(getViewLifecycleOwner(), tasks ->{
             upcomingAdapter.submitList(tasks);
-            tvUpcoming.setText("Upcoming(" + upcomingAdapter.getItemCount() + ")");
+            tvUpcoming.setText("Upcoming(" + tasks.size() + ")");
         });
         viewModel.getLateTasks(DateConverter.getCurrentDate()).observe(getViewLifecycleOwner(), tasks ->{
             lateAdapter.submitList(tasks);
-            tvLate.setText("Late(" + lateAdapter.getItemCount() + ")");
+            tvLate.setText("Late(" + tasks.size() + ")");
         });
-
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                return false;
-            }
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                viewModel.delete(todayAdapter.getItem(viewHolder.getAdapterPosition()).getId());
-                tvToday.setText("Today(" + todayAdapter.getItemCount() + ")");
-            }
-        }).attachToRecyclerView(rvToday);
-
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                return false;
-            }
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                viewModel.delete(tomorrowAdapter.getItem(viewHolder.getAdapterPosition()).getId());
-                tvTomorrow.setText("Tomorrow(" + tomorrowAdapter.getItemCount() + ")");
-            }
-        }).attachToRecyclerView(rvTomorrow);
-
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                return false;
-            }
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                viewModel.delete(upcomingAdapter.getItem(viewHolder.getAdapterPosition()).getId());
-                tvUpcoming.setText("Upcoming(" + upcomingAdapter.getItemCount() + ")");
-            }
-        }).attachToRecyclerView(rvUpcoming);
-
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                return false;
-            }
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                viewModel.delete(lateAdapter.getItem(viewHolder.getAdapterPosition()).getId());
-                tvLate.setText("Late(" + lateAdapter.getItemCount() + ")");
-            }
-        }).attachToRecyclerView(rvLate);
 
         ViewGroup.LayoutParams params1 = rvToday.getLayoutParams();
         ViewGroup.LayoutParams params2 = rvTomorrow.getLayoutParams();
@@ -147,7 +98,7 @@ public class NormalFragment extends Fragment {
             }
         });
 
-        rvUpcoming.setOnClickListener(new View.OnClickListener() {
+        tvUpcoming.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(params3.height!=0)
@@ -158,7 +109,7 @@ public class NormalFragment extends Fragment {
             }
         });
 
-        rvLate.setOnClickListener(new View.OnClickListener() {
+        tvLate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(params4.height!=0)

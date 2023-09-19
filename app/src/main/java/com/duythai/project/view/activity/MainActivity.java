@@ -22,14 +22,14 @@ public class MainActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        fragmentManager = getSupportFragmentManager();
+
         fabAdd = findViewById(R.id.fabAdd);
         fabAdd.setOnClickListener(view -> {
             AddTaskDialogFragment addTaskFragment = new AddTaskDialogFragment();
-            FragmentManager fragmentManager = getSupportFragmentManager();
             addTaskFragment.show(fragmentManager, "AddTaskDialogFragment");
         });
 
-        fragmentManager = getSupportFragmentManager();
         NormalFragment normalFragment = new NormalFragment();
         CategoryFragment categoryFragment = new CategoryFragment();
         SettingFragment settingFragment = new SettingFragment();

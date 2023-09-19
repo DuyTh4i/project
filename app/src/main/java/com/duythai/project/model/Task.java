@@ -36,7 +36,7 @@ public class Task {
     }
 
     public static Date stringToDate(String dateString) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         try {
             return dateFormat.parse(dateString);
         } catch (ParseException e) {

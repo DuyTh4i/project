@@ -15,7 +15,7 @@ import java.util.List;
 
 public class TaskViewModel extends AndroidViewModel {
     private TaskRepository taskRepository;
-    private LiveData<List<Task>> todayTasks, tomorrowTasks, upcomingTasks, lateTasks;
+    private LiveData<List<Task>> todayTasks, tomorrowTasks, upcomingTasks, lateTasks, personalTasks, workTasks, healthTasks, financeTasks, familyTasks;;
     public TaskViewModel(@NonNull Application application) {
         super(application);
         taskRepository = new TaskRepository(application);
@@ -23,6 +23,11 @@ public class TaskViewModel extends AndroidViewModel {
         tomorrowTasks = taskRepository.getTomorrowTasks(DateConverter.getTomorrow());
         upcomingTasks = taskRepository.getUpcomingTasks(DateConverter.getTomorrow());
         lateTasks = taskRepository.getLateTasks(DateConverter.getCurrentDate());
+        personalTasks = taskRepository.getTasksByCategory("Personal");
+        workTasks = taskRepository.getTasksByCategory("Work");
+        familyTasks = taskRepository.getTasksByCategory("Family");
+        financeTasks = taskRepository.getTasksByCategory("Finance");
+        healthTasks = taskRepository.getTasksByCategory("Health");
     }
 
     public LiveData<List<Task>> getTomorrowTasks(Date date) {
@@ -41,11 +46,30 @@ public class TaskViewModel extends AndroidViewModel {
         return upcomingTasks;
     }
 
+    public LiveData<List<Task>> getTasksByCategory(String category) {
+        switch (category){
+            case "Personal":
+                return personalTasks;
+            case "Work":
+                return workTasks;
+            case "Health":
+                return healthTasks;
+            case "Finance":
+                return financeTasks;
+            default:
+                return familyTasks;
+        }
+    }
+
     public void delete(long id) {
         taskRepository.delete(id);
     }
 
     public void insert(Task task){
         taskRepository.insert(task);
+    }
+
+    public void update(Task task) {
+        taskRepository.update(task);
     }
 }

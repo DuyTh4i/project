@@ -2,49 +2,30 @@ package com.duythai.project.view.fragment;
 
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.*;
-import androidx.room.Room;
 
 import android.view.*;
 import android.widget.TextView;
 
-import com.duythai.project.DAO.AppDatabase;
-import com.duythai.project.DAO.TaskDAO;
 import com.duythai.project.R;
 import com.duythai.project.apdapter.TaskAdapter;
-import com.duythai.project.model.Task;
-
-import java.util.ArrayList;
-import java.util.Date;
+import com.duythai.project.viewmodel.TaskViewModel;
 
 public class CategoryFragment extends Fragment {
 
     RecyclerView rvPersonal, rvWork, rvFinance, rvFamily, rvHealth;
     TextView tvPersonal, tvWork, tvFinance, tvFamily, tvHealth;
-    public static ArrayList<Task> tasks;
-    ArrayList<Task> personal, work, finance, family, health;
-    public static TaskAdapter personalAdapter, workAdapter, financeAdapter, familyAdapter, healthAdapter;
-    AppDatabase db;
-    TaskDAO taskDAO;
+    TaskViewModel viewModel;
 
     public CategoryFragment(){}
-
-    public interface OnTaskAddedListener{
-        void onTaskAddedCategory(Task task);
-        boolean onNavigationItemSelectedCategory(@NonNull MenuItem item);
-    }
-
-    public void addTaskToList(Task task){
-        tasks.add(task);
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_category, container, false);
-        View cardLayout = inflater.inflate(R.layout.layout_item, container, false);
+        viewModel = new ViewModelProvider(this).get(TaskViewModel.class);
 
         tvPersonal = root.findViewById(R.id.tvPersonal);
         tvWork = root.findViewById(R.id.tvWork);
@@ -58,26 +39,11 @@ public class CategoryFragment extends Fragment {
         rvFinance = root.findViewById(R.id.rvFinance);
         rvHealth = root.findViewById(R.id.rvHealth);
 
-        db = Room.databaseBuilder(requireContext(), AppDatabase.class, "prjdb").allowMainThreadQueries().build();
-        taskDAO = db.taskDAO();
-
-        personal = new ArrayList<>();
-        work = new ArrayList<>();
-        finance = new ArrayList<>();
-        family = new ArrayList<>();
-        health = new ArrayList<>();
-
-        personalAdapter = new TaskAdapter(new TaskAdapter.TaskDiff());
-        workAdapter = new TaskAdapter(new TaskAdapter.TaskDiff());
-        financeAdapter = new TaskAdapter(new TaskAdapter.TaskDiff());
-        familyAdapter = new TaskAdapter(new TaskAdapter.TaskDiff());
-        healthAdapter = new TaskAdapter(new TaskAdapter.TaskDiff());
-
-        /*ArrayList<Task> list = new ArrayList<>(db.taskDAO().getAll());
-        for(Task task : list){
-            loadTask(task.getContent(), task.getCategory(), task.getDate(), task.getNote());
-        }*/
-
+        TaskAdapter personalAdapter = new TaskAdapter(new TaskAdapter.TaskDiff(), getParentFragmentManager());
+        TaskAdapter workAdapter = new TaskAdapter(new TaskAdapter.TaskDiff(), getParentFragmentManager());
+        TaskAdapter financeAdapter = new TaskAdapter(new TaskAdapter.TaskDiff(), getParentFragmentManager());
+        TaskAdapter familyAdapter = new TaskAdapter(new TaskAdapter.TaskDiff(), getParentFragmentManager());
+        TaskAdapter healthAdapter = new TaskAdapter(new TaskAdapter.TaskDiff(), getParentFragmentManager());
 
         rvPersonal.setLayoutManager(new LinearLayoutManager(requireContext()));
         rvWork.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -91,66 +57,30 @@ public class CategoryFragment extends Fragment {
         rvFinance.setAdapter(financeAdapter);
         rvHealth.setAdapter(healthAdapter);
 
-        tvPersonal.setText("Personal(" + personal.size() + ")");
-        tvWork.setText("Work(" + work.size() + ")");
-        tvFamily.setText("Family(" + family.size() + ")");
-        tvFinance.setText("Finance(" + finance.size() + ")");
-        tvHealth.setText("Health(" + health.size() + ")");
+        viewModel.getTasksByCategory("Personal").observe(getViewLifecycleOwner(), tasks -> {
+            tvPersonal.setText("Personal(" + tasks.size() + ")");
+            personalAdapter.submitList(tasks);
+        });
 
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                return false;
-            }
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                personal.remove(viewHolder.getAdapterPosition());
-            }
-        }).attachToRecyclerView(rvPersonal);
+        viewModel.getTasksByCategory("Work").observe(getViewLifecycleOwner(), tasks -> {
+            tvWork.setText("Work(" + tasks.size() + ")");
+            workAdapter.submitList(tasks);
+        });
 
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                return false;
-            }
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                work.remove(viewHolder.getAdapterPosition());
-            }
-        }).attachToRecyclerView(rvWork);
+        viewModel.getTasksByCategory("Family").observe(getViewLifecycleOwner(), tasks -> {
+            tvFamily.setText("Family(" + tasks.size() + ")");
+            familyAdapter.submitList(tasks);
+        });
 
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                return false;
-            }
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                //familyAdapter.remove(viewHolder.getAdapterPosition());
-            }
-        }).attachToRecyclerView(rvFamily);
+        viewModel.getTasksByCategory("Finance").observe(getViewLifecycleOwner(), tasks -> {
+            tvFinance.setText("Finance(" + tasks.size() + ")");
+            financeAdapter.submitList(tasks);
+        });
 
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                return false;
-            }
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                //financeAdapter.remove(viewHolder.getAdapterPosition());
-            }
-        }).attachToRecyclerView(rvFinance);
-
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                return false;
-            }
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                //healthAdapter.remove(viewHolder.getAdapterPosition());
-            }
-        }).attachToRecyclerView(rvHealth);
+        viewModel.getTasksByCategory("Health").observe(getViewLifecycleOwner(), tasks -> {
+            tvHealth.setText("Health(" + tasks.size() + ")");
+            healthAdapter.submitList(tasks);
+        });
 
         ViewGroup.LayoutParams params1 = rvPersonal.getLayoutParams();
         ViewGroup.LayoutParams params2 = rvWork.getLayoutParams();
@@ -213,26 +143,5 @@ public class CategoryFragment extends Fragment {
             }
         });
         return root;
-    }
-
-    public void loadTask(String content, String category, String note, Date date) {
-        Task task = new Task(content, category, note, date,false);
-        switch (category) {
-            case "Personal":
-                personal.add(task);
-                break;
-            case "Work":
-                work.add(task);
-                break;
-            case "Health":
-                health.add(task);
-                break;
-            case "Finance":
-                finance.add(task);
-                break;
-            case "Family":
-                family.add(task);
-                break;
-        }
     }
 }
